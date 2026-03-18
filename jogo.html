@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Inclusivo - Mitos ou Verdades</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* DESIGN INTERATIVO E MODERNO */
+        * {
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #74ebd5 0%, #9face6 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            margin-bottom: 25px;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .audio-btn {
+            background: #f0f4f8;
+            color: #333;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            align-self: center;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .audio-btn:hover {
+            background: #e1e8ed;
+            transform: scale(1.05);
+        }
+
+        #question-text {
+            font-size: 1.2rem;
+            color: #2d3748;
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 16px 24px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active { 
+            transform: translateY(2px);
+        }
+
+        .mito { background-color: #ff6b6b; color: white; }
+        .verdade { background-color: #51cf66; color: white; }
+
+        .feedback {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            min-height: 60px;
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .progress {
+            margin-top: 15px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <h1>Mito ou Verdade?</h1>
+        
+        <div id="card" class="card">
+            <button onclick="lerPergunta()" class="audio-btn" aria-label="Ouvir pergunta">
+                🔊 Ouvir Pergunta
+            </button>
+            <p id="question-text">Carregando...</p>
+        </div>
+
+        <div class="buttons">
+            <button onclick="checkAnswer(false)" class="btn mito">MITO</button>
+            <button onclick="checkAnswer(true)" class="btn verdade">VERDADE</button>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+        <div id="progress" class="progress"></div>
+    </div>
+
+    <script>
+        const questions = [
+            { text: "O autismo é uma doença que tem cura.", isTrue: false, explanation: "O autismo é uma condição de desenvolvimento neurológico, não uma doença." },
+            { text: "Suportes visuais, como fotos e desenhos, ajudam muito na comunicação na escola.", isTrue: true, explanation: "Isso traz previsibilidade e diminui a ansiedade do aluno." },
+            { text: "Pessoas autistas não gostam de fazer amigos.", isTrue: false, explanation: "Eles desejam conexões, mas podem socializar de maneiras diferentes." },
+            { text: "O termo mais adequado de se usar é 'Pessoa com Deficiência' (PcD).", isTrue: true, explanation: "Exato! O termo foca na pessoa antes da deficiência. Evite o termo 'portador'." },
+            { text: "A Língua Brasileira de Sinais (Libras) é universal e igual em todo o mundo.", isTrue: false, explanation: "Mito! Cada país tem sua própria língua de sinais, com sinais e gramáticas diferentes." },
+            { text: "Pessoas cegas desenvolvem uma audição extraordinária ou superpoderes.", isTrue: false, explanation: "Não é um poder. Elas apenas treinam e prestam mais atenção aos outros sentidos por necessidade." },
+            { text: "Acessibilidade física, como rampas, ajuda apenas quem usa cadeira de rodas.", isTrue: false, explanation: "Rampas ajudam idosos, pessoas com carrinhos de bebê e pessoas com mobilidade reduzida temporária." },
+            { text: "A Síndrome de Down é contagiosa.", isTrue: false, explanation: "Mito! É uma alteração genética natural e não é uma doença transmissível." },
+            { text: "Pessoas com deficiência intelectual podem ter um emprego e morar sozinhas.", isTrue: true, explanation: "Verdade! Com apoio e estímulo, muitas alcançam grande independência e autonomia." },
+            { text: "Toda pessoa surda é também muda.", isTrue: false, explanation: "Mito! Muitas pessoas surdas têm as cordas vocais perfeitas e podem falar se desejarem ou treinarem." },
+            { text: "A cadeira de rodas é uma ferramenta de liberdade para quem tem deficiência física.", isTrue: true, explanation: "Verdade! Ela permite que a pessoa se locomova, estude, trabalhe e se divirta." },
+            { text: "Paralisia Cerebral significa que a pessoa não entende o que acontece ao redor.", isTrue: false, explanation: "Mito! A paralisia afeta os movimentos, mas a maioria das pessoas tem a cognição preservada." }
+        ];
+
+        let currentIndex = 0;
+        let isProcessing = false;
+
+        function updateCard() {
+            const q = questions[currentIndex];
+            document.getElementById("question-text").innerText = q.text;
+            document.getElementById("progress").innerText = `Pergunta ${currentIndex + 1} de ${questions.length}`;
+            
+            const feedbackEl = document.getElementById("feedback");
+            feedbackEl.style.display = "none";
+            isProcessing = false;
+        }
+
+        function checkAnswer(userChoice) {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            const q = questions[currentIndex];
+            const feedbackEl = document.getElementById("feedback");
+            
+            feedbackEl.style.display = "block";
+
+            if (userChoice === q.isTrue) {
+                feedbackEl.innerHTML = "✅ <strong>Correto!</strong><br>" + q.explanation;
+                feedbackEl.style.backgroundColor = "#e8fbf0";
+                feedbackEl.style.color = "#2b8a3e";
+                feedbackEl.style.border = "2px solid #51cf66";
+            } else {
+                feedbackEl.innerHTML = "❌ <strong>Ops, não é bem assim!</strong><br>" + q.explanation;
+                feedbackEl.style.backgroundColor = "#fff5f5";
+                feedbackEl.style.color = "#c92a2a";
+                feedbackEl.style.border = "2px solid #ff6b6b";
+            }
+
+            // Aguarda 4 segundos para ler a explicação e passa para a próxima
+            setTimeout(() => {
+                currentIndex++;
+                if (currentIndex >= questions.length) {
+                    currentIndex = 0; // Reinicia o quiz
+                    alert("Você completou o Quiz Inclusivo! Vamos recomeçar para fixar o aprendizado?");
+                }
+                updateCard();
+            }, 4000);
+        }
+
+        function lerPergunta() {
+            window.speechSynthesis.cancel(); 
+            const text = questions[currentIndex].text;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 1; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        window.onload = updateCard;
+    </script>
+</body>
+</html>
